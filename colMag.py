@@ -39,7 +39,7 @@ class Main(object):
 		
 		# Retrive and set up image.
 		image = Image.open('./files/colMag.jpg') # Load image file
-		image = image.resize((int(730*scale),int(750*scale)), Image.ANTIALIAS) # Resize and smooth
+		image = image.resize((int(730*scale),int(750*scale)), Image.LANCZOS) # Resize and smooth
 		photo = ImageTk.PhotoImage(image) # Create photo object for canvas.
 		
 		# Create frame to hold image..
