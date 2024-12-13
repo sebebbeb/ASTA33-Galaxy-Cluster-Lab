@@ -85,6 +85,7 @@ plt.errorbar(
 x_late = np.linspace(late_data['mag'].min(), late_data['mag'].max(), 500)
 plt.plot(x_late, late_slope * x_late + late_intercept, '-b', lw=2, alpha=0.7, label='Late Fit')
 
+plt.title('Colour-Magnitude Diagram of Early and Late Type Galaxies')
 plt.grid()
 plt.legend(fontsize=14)
 plt.tight_layout()
