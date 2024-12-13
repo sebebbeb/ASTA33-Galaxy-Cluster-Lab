@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+##########################################
+# Outdated use ImprovedAnalysis.py instead
+##########################################
+
 datadir_early = './early1.dat'
 datadir_late = './late1.dat'
 
@@ -21,13 +25,15 @@ late_data = clean_data(late_data)
 early_data = early_data[early_data['mag'] < 24]
 late_data = late_data[late_data['mag'] < 24]
 
-#early_p1, early_p2 = np.polyfit(early_data['mag'], early_data['col'], deg=1)
-late_p1, late_p2 = np.polyfit(late_data['mag'], late_data['col'], deg=1)
-
-# Linear fit with errors
-early_fit, cov_matrix = np.polyfit(early_data['mag'], early_data['col'], deg=1, cov=True)
+# Linear fit for early data with errors
+early_fit, early_cov_matrix = np.polyfit(early_data['mag'], early_data['col'], deg=1, cov=True)
 early_p1, early_p2 = early_fit
-early_p1_err, early_p2_err = np.sqrt(np.diag(cov_matrix))
+early_p1_err, early_p2_err = np.sqrt(np.diag(early_cov_matrix))
+
+# Linear fit for late data with errors
+late_fit, late_cov_matrix = np.polyfit(late_data['mag'], late_data['col'], deg=1, cov=True)
+late_p1, late_p2 = late_fit
+late_p1_err, late_p2_err = np.sqrt(np.diag(late_cov_matrix))
 
 # Plot
 plt.style.use('classic')
@@ -39,11 +45,17 @@ plt.xlabel(r'${\rm Magnitude,}\ I$', fontsize=18)
 plt.ylim(0, 4)
 plt.xlim(18, 26)
 
+# Plot early data and fit
 plt.errorbar(early_data['mag'], early_data['col'], xerr=early_data['emag'], yerr=early_data['ecol'],
              color='darkred', fmt=' ', ecolor='red', elinewidth=1, capsize=2, label='Early Type')
-
 x_early = np.linspace(early_data['mag'].min(), early_data['mag'].max(), 500)
 plt.plot(x_early, early_p1 * x_early + early_p2, '-r', lw=2, alpha=0.7, label='Early Fit')
+
+# Plot late data and fit
+plt.errorbar(late_data['mag'], late_data['col'], xerr=late_data['emag'], yerr=late_data['ecol'],
+             color='darkblue', fmt=' ', ecolor='blue', elinewidth=1, capsize=2, label='Late Type')
+x_late = np.linspace(late_data['mag'].min(), late_data['mag'].max(), 500)
+plt.plot(x_late, late_p1 * x_late + late_p2, '-b', lw=2, alpha=0.7, label='Late Fit')
 
 plt.grid()
 plt.legend(fontsize=14)
@@ -87,6 +99,9 @@ I_apparent_err = np.sqrt(
     (1 / early_p1)**2 * early_p2_err**2 +
     ((V_I_target - early_p2) / early_p1**2)**2 * early_p1_err**2
 )
+# Check for reasonable early_p1 and uncertainties
+if early_p1 <= 0 or early_p1_err / early_p1 > 0.1:
+    print("Warning: Large relative uncertainty in slope (early_p1). Results may be unreliable.")
 
 # Distance modulus
 absolute_magnitude = -21.3
@@ -98,6 +113,7 @@ distance_modulus_err = np.sqrt(I_apparent_err**2 + absolute_magnitude_error**2)
 distance_pc = 10**((distance_modulus + 5) / 5)
 distance_pc_err = distance_pc * np.log(10) / 5 * distance_modulus_err
 
+# Output results
 print(f"Apparent magnitude (I): {I_apparent:.2f} ± {I_apparent_err:.2f}")
 print(f"Distance modulus (μ): {distance_modulus:.2f} ± {distance_modulus_err:.2f}")
 print(f"Distance to Cl0016+16 (parsecs): {distance_pc:.2e} ± {distance_pc_err:.2e} pc")
